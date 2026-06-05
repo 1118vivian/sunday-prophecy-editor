@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>主日申言稿編輯器</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./vendor/docx.umd.js"></script>
+    <script defer src="./vendor/html2pdf.bundle.min.js"></script>
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="editor-pane" aria-label="主日申言稿欄位">
+        <div class="pane-heading">
+          <div>
+            <p class="eyebrow">臺灣福音工作全時間訓練壯年成全班</p>
+            <h1>主日申言稿編輯器</h1>
+          </div>
+          <button class="ghost-button" id="clearForm" type="button">清空</button>
+        </div>
+
+        <form id="prophecyForm" class="form-grid">
+          <label>
+            <span>第幾組</span>
+            <input id="group" name="group" type="text" inputmode="numeric" placeholder="例如：3" />
+          </label>
+
+          <label>
+            <span>姓名</span>
+            <input id="name" name="name" type="text" placeholder="請輸入姓名" />
+          </label>
+
+          <label>
+            <span>第幾週</span>
+            <input id="week" name="week" type="text" inputmode="numeric" placeholder="例如：12" />
+          </label>
+
+          <label>
+            <span>開始日期</span>
+            <input id="startDate" name="startDate" type="date" />
+          </label>
+
+          <label>
+            <span>結束日期</span>
+            <input id="endDate" name="endDate" type="date" />
+          </label>
+
+          <label class="span-full">
+            <span>題目</span>
+            <input id="title" name="title" type="text" placeholder="請輸入申言題目" />
+          </label>
+
+          <label class="span-full">
+            <span>經文</span>
+            <textarea id="scripture" name="scripture" rows="5" placeholder="請輸入經文"></textarea>
+          </label>
+
+          <label class="span-full">
+            <span>啟示</span>
+            <textarea id="revelation" name="revelation" rows="7" placeholder="請輸入啟示"></textarea>
+          </label>
+
+          <label class="span-full">
+            <span>應用</span>
+            <textarea id="application" name="application" rows="7" placeholder="請輸入應用"></textarea>
+          </label>
+        </form>
+
+        <div class="actions" aria-label="產生檔案">
+          <button id="downloadDocx" type="button">產生 DOCX</button>
+          <button id="downloadPdf" type="button">產生 PDF</button>
+        </div>
+      </section>
+
+      <section class="preview-pane" aria-label="預覽">
+        <div class="preview-toolbar">
+          <h2>預覽</h2>
+          <span id="fileNamePreview">主日申言稿.docx</span>
+        </div>
+
+        <article id="documentPreview" class="document-page">
+          <header class="doc-header">
+            <p>臺灣福音工作全時間訓練壯年成全班</p>
+            <h2>主日申言稿</h2>
+          </header>
+
+          <div class="meta-line">
+            <span>第 <strong data-preview="group"></strong> 組</span>
+            <span>姓名 <strong data-preview="name"></strong></span>
+            <span>第 <strong data-preview="week"></strong> 週</span>
+            <span><strong data-preview="startDateText"></strong> 至 <strong data-preview="endDateText"></strong></span>
+          </div>
+
+          <section class="doc-section">
+            <h3>題目</h3>
+            <div class="section-body" data-preview="title"></div>
+          </section>
+
+          <section class="doc-section">
+            <h3>經文</h3>
+            <div class="section-body multiline" data-preview="scripture"></div>
+          </section>
+
+          <section class="doc-section">
+            <h3>啟示</h3>
+            <div class="section-body multiline tall" data-preview="revelation"></div>
+          </section>
+
+          <section class="doc-section">
+            <h3>應用</h3>
+            <div class="section-body multiline tall" data-preview="application"></div>
+          </section>
+
+          <footer class="notes">
+            <p>備註：1. 申言時注意：靈要剛強、思路清明、體態合宜。</p>
+            <p>　　　2. 申言稿內容以當週晨興聖言進度為範圍，以3分鐘為限。</p>
+            <p>　　　3. 若本週改寫其他作業，則不必填寫本表。</p>
+          </footer>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
