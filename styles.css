@@ -3,7 +3,6 @@
   --ink: #1f2933;
   --muted: #65717e;
   --line: #c9d1d9;
-  --soft: #f3f6f8;
   --paper: #fffdfa;
   --accent: #0f766e;
   --accent-strong: #115e59;
@@ -231,7 +230,6 @@ button:hover {
   margin: 0;
   padding: 12px;
   border-right: 1px solid var(--line);
-  background: var(--soft);
   font-size: 20px;
   font-weight: 700;
 }

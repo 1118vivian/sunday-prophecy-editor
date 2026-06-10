@@ -92,7 +92,7 @@
     return new docx.TableRow({
       height: { value: minHeight, rule: docx.HeightRule.ATLEAST },
       children: [
-        makeCell([labelParagraph(label)], { width: 1100, shading: "F3F6F8" }),
+        makeCell([labelParagraph(label)], { width: 1100 }),
         makeCell([contentParagraph(text)]),
       ],
     });
