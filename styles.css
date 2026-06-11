@@ -207,7 +207,7 @@ button:hover {
   margin: 24px 0 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
-  font-size: 17px;
+  font-size: 19px;
 }
 
 .meta-line strong {
@@ -237,14 +237,14 @@ button:hover {
   padding: 12px;
   border-right: 1px solid var(--line);
   background: var(--paper);
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
 }
 
 .section-body {
   min-height: 54px;
   padding: 12px 14px;
-  font-size: 17px;
+  font-size: 19px;
   line-height: 1.75;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -266,7 +266,7 @@ button:hover {
 .notes {
   margin-top: 16px;
   color: #202a33;
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1.7;
 }
 

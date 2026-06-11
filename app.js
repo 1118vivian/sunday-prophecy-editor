@@ -14,6 +14,7 @@
   const form = document.getElementById("prophecyForm");
   const fileNamePreview = document.getElementById("fileNamePreview");
   const preview = document.getElementById("documentPreview");
+  const WORD_BODY_SIZE = 28;
 
   const data = () =>
     Object.fromEntries(fields.map((field) => [field, document.getElementById(field).value.trim()]));
@@ -55,7 +56,7 @@
     return lines.flatMap((line, index) => {
       const runs = [];
       if (index > 0) runs.push(new docx.TextRun({ break: 1 }));
-      runs.push(new docx.TextRun({ text: line, font: "Microsoft JhengHei", size: 22 }));
+      runs.push(new docx.TextRun({ text: line, font: "Microsoft JhengHei", size: WORD_BODY_SIZE }));
       return runs;
     });
   };
@@ -75,7 +76,7 @@
     const docx = window.docx;
     return new docx.Paragraph({
       alignment: docx.AlignmentType.CENTER,
-      children: [new docx.TextRun({ text, bold: true, font: "Microsoft JhengHei", size: 24 })],
+      children: [new docx.TextRun({ text, bold: true, font: "Microsoft JhengHei", size: WORD_BODY_SIZE })],
     });
   };
 
@@ -124,13 +125,13 @@
             new docx.Paragraph({
               spacing: { after: 180 },
               children: [
-                new docx.TextRun({ text: `第 ${values.group || "　"} 組   `, font: "Microsoft JhengHei", size: 22 }),
-                new docx.TextRun({ text: `姓名 ${values.name || "　　　　　"}   `, font: "Microsoft JhengHei", size: 22 }),
-                new docx.TextRun({ text: `第 ${values.week || "　"} 週   `, font: "Microsoft JhengHei", size: 22 }),
+                new docx.TextRun({ text: `第 ${values.group || "　"} 組   `, font: "Microsoft JhengHei", size: WORD_BODY_SIZE }),
+                new docx.TextRun({ text: `姓名 ${values.name || "　　　　　"}   `, font: "Microsoft JhengHei", size: WORD_BODY_SIZE }),
+                new docx.TextRun({ text: `第 ${values.week || "　"} 週   `, font: "Microsoft JhengHei", size: WORD_BODY_SIZE }),
                 new docx.TextRun({
                   text: `${dateText(values.startDate) || "20　年　月　日"} 至 ${dateText(values.endDate) || "20　年　月　日"}`,
                   font: "Microsoft JhengHei",
-                  size: 22,
+                  size: WORD_BODY_SIZE,
                 }),
               ],
             }),
@@ -143,9 +144,9 @@
                 sectionRow("應用", values.application, 3050),
               ],
             }),
-            new docx.Paragraph({ spacing: { before: 220 }, children: [new docx.TextRun({ text: "備註：1. 申言時注意：靈要剛強、思路清明、體態合宜。", font: "Microsoft JhengHei", size: 20 })] }),
-            new docx.Paragraph({ children: [new docx.TextRun({ text: "　　　2. 申言稿內容以當週晨興聖言進度為範圍，以3分鐘為限。", font: "Microsoft JhengHei", size: 20 })] }),
-            new docx.Paragraph({ children: [new docx.TextRun({ text: "　　　3. 若本週改寫其他作業，則不必填寫本表。", font: "Microsoft JhengHei", size: 20 })] }),
+            new docx.Paragraph({ spacing: { before: 220 }, children: [new docx.TextRun({ text: "備註：1. 申言時注意：靈要剛強、思路清明、體態合宜。", font: "Microsoft JhengHei", size: WORD_BODY_SIZE })] }),
+            new docx.Paragraph({ children: [new docx.TextRun({ text: "　　　2. 申言稿內容以當週晨興聖言進度為範圍，以3分鐘為限。", font: "Microsoft JhengHei", size: WORD_BODY_SIZE })] }),
+            new docx.Paragraph({ children: [new docx.TextRun({ text: "　　　3. 若本週改寫其他作業，則不必填寫本表。", font: "Microsoft JhengHei", size: WORD_BODY_SIZE })] }),
           ],
         },
       ],
@@ -158,17 +159,45 @@
   const buildPdf = async () => {
     if (!window.html2pdf) throw new Error("PDF 套件尚未載入，請確認網路連線後重試。");
     const values = data();
-    await window.html2pdf()
-      .set({
-        margin: 8,
-        filename: fileName(values, "pdf"),
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#fffdfa" },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["avoid-all"] },
-      })
-      .from(preview)
-      .save();
+    if (!window.html2canvas || !window.jspdf?.jsPDF) {
+      await window.html2pdf()
+        .set({
+          margin: 6,
+          filename: fileName(values, "pdf"),
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#fffdfa" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["avoid-all"] },
+        })
+        .from(preview)
+        .save();
+      return;
+    }
+
+    const canvas = await window.html2canvas(preview, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#fffdfa",
+    });
+    const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 6;
+    const maxWidth = pageWidth - margin * 2;
+    const maxHeight = pageHeight - margin * 2;
+    const imageRatio = canvas.width / canvas.height;
+    let imageWidth = maxWidth;
+    let imageHeight = imageWidth / imageRatio;
+
+    if (imageHeight > maxHeight) {
+      imageHeight = maxHeight;
+      imageWidth = imageHeight * imageRatio;
+    }
+
+    const x = (pageWidth - imageWidth) / 2;
+    const y = (pageHeight - imageHeight) / 2;
+    pdf.addImage(canvas.toDataURL("image/jpeg", 0.98), "JPEG", x, y, imageWidth, imageHeight);
+    pdf.save(fileName(values, "pdf"));
   };
 
   const saveBlob = (blob, name) => {
