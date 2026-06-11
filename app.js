@@ -15,6 +15,12 @@
   const fileNamePreview = document.getElementById("fileNamePreview");
   const preview = document.getElementById("documentPreview");
   const WORD_BODY_SIZE = 28;
+  const A4_WIDTH_DXA = 11906;
+  const A4_HEIGHT_DXA = 16838;
+  const PAGE_HORIZONTAL_MARGIN_DXA = 720;
+  const TABLE_WIDTH_DXA = A4_WIDTH_DXA - PAGE_HORIZONTAL_MARGIN_DXA * 2;
+  const LABEL_WIDTH_DXA = 1100;
+  const CONTENT_WIDTH_DXA = TABLE_WIDTH_DXA - LABEL_WIDTH_DXA;
 
   const data = () =>
     Object.fromEntries(fields.map((field) => [field, document.getElementById(field).value.trim()]));
@@ -93,8 +99,8 @@
     return new docx.TableRow({
       height: { value: minHeight, rule: docx.HeightRule.ATLEAST },
       children: [
-        makeCell([labelParagraph(label)], { width: 1100 }),
-        makeCell([contentParagraph(text)]),
+        makeCell([labelParagraph(label)], { width: LABEL_WIDTH_DXA }),
+        makeCell([contentParagraph(text)], { width: CONTENT_WIDTH_DXA }),
       ],
     });
   };
@@ -109,6 +115,7 @@
         {
           properties: {
             page: {
+              size: { width: A4_WIDTH_DXA, height: A4_HEIGHT_DXA },
               margin: { top: 720, right: 720, bottom: 560, left: 720 },
             },
           },
@@ -136,7 +143,9 @@
               ],
             }),
             new docx.Table({
-              width: { size: 100, type: docx.WidthType.PERCENTAGE },
+              width: { size: TABLE_WIDTH_DXA, type: docx.WidthType.DXA },
+              layout: docx.TableLayoutType.FIXED,
+              columnWidths: [LABEL_WIDTH_DXA, CONTENT_WIDTH_DXA],
               rows: [
                 sectionRow("題目", values.title, 560),
                 sectionRow("經文", values.scripture, 1320),
