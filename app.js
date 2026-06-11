@@ -157,23 +157,8 @@
   };
 
   const buildPdf = async () => {
-    if (!window.html2pdf) throw new Error("PDF 套件尚未載入，請確認網路連線後重試。");
+    if (!window.html2canvas || !window.jspdf?.jsPDF) throw new Error("PDF 單頁產生套件尚未載入，請重新整理頁面後再試。");
     const values = data();
-    if (!window.html2canvas || !window.jspdf?.jsPDF) {
-      await window.html2pdf()
-        .set({
-          margin: 6,
-          filename: fileName(values, "pdf"),
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#fffdfa" },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["avoid-all"] },
-        })
-        .from(preview)
-        .save();
-      return;
-    }
-
     const canvas = await window.html2canvas(preview, {
       scale: 2,
       useCORS: true,
