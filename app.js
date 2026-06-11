@@ -159,11 +159,22 @@
   const buildPdf = async () => {
     if (!window.html2canvas || !window.jspdf?.jsPDF) throw new Error("PDF 單頁產生套件尚未載入，請重新整理頁面後再試。");
     const values = data();
-    const canvas = await window.html2canvas(preview, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#fffdfa",
-    });
+    const exportPreview = preview.cloneNode(true);
+    exportPreview.id = "documentPreviewPdf";
+    exportPreview.classList.add("pdf-export-page");
+    document.body.appendChild(exportPreview);
+
+    let canvas;
+    try {
+      canvas = await window.html2canvas(exportPreview, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+    } finally {
+      exportPreview.remove();
+    }
+
     const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
     const pageWidth = 210;
     const pageHeight = 297;
