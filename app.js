@@ -105,10 +105,30 @@
     });
   };
 
+  const captureA4Preview = async (scale = 2) => {
+    if (!window.html2canvas) throw new Error("版面產生套件尚未載入，請重新整理頁面後再試。");
+    const exportPreview = preview.cloneNode(true);
+    exportPreview.id = "documentPreviewExport";
+    exportPreview.classList.add("pdf-export-page");
+    document.body.appendChild(exportPreview);
+
+    try {
+      return await window.html2canvas(exportPreview, {
+        scale,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+    } finally {
+      exportPreview.remove();
+    }
+  };
+
   const buildDocx = async () => {
     if (!window.docx) throw new Error("DOCX 套件尚未載入，請確認網路連線後重試。");
+    if (!window.html2canvas) throw new Error("手機版 Word 版面套件尚未載入，請重新整理頁面後再試。");
     const docx = window.docx;
     const values = data();
+    const canvas = await captureA4Preview(1);
 
     const doc = new docx.Document({
       sections: [
@@ -116,46 +136,24 @@
           properties: {
             page: {
               size: { width: A4_WIDTH_DXA, height: A4_HEIGHT_DXA },
-              margin: { top: 720, right: 720, bottom: 560, left: 720 },
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
             },
           },
           children: [
             new docx.Paragraph({
-              alignment: docx.AlignmentType.CENTER,
-              children: [new docx.TextRun({ text: "臺灣福音工作全時間訓練壯年成全班", bold: true, font: "Microsoft JhengHei", size: 28 })],
-            }),
-            new docx.Paragraph({
-              alignment: docx.AlignmentType.CENTER,
-              spacing: { after: 260 },
-              children: [new docx.TextRun({ text: "主日申言稿", bold: true, font: "Microsoft JhengHei", size: 36 })],
-            }),
-            new docx.Paragraph({
-              spacing: { after: 180 },
+              spacing: { before: 0, after: 0 },
               children: [
-                new docx.TextRun({ text: `第 ${values.group || "　"} 組   `, font: "Microsoft JhengHei", size: WORD_BODY_SIZE }),
-                new docx.TextRun({ text: `姓名 ${values.name || "　　　　　"}   `, font: "Microsoft JhengHei", size: WORD_BODY_SIZE }),
-                new docx.TextRun({ text: `第 ${values.week || "　"} 週   `, font: "Microsoft JhengHei", size: WORD_BODY_SIZE }),
-                new docx.TextRun({
-                  text: `${dateText(values.startDate) || "20　年　月　日"} 至 ${dateText(values.endDate) || "20　年　月　日"}`,
-                  font: "Microsoft JhengHei",
-                  size: WORD_BODY_SIZE,
+                new docx.ImageRun({
+                  data: canvas.toDataURL("image/png"),
+                  transformation: { width: 794, height: 1123 },
+                  altText: {
+                    title: "主日申言稿",
+                    description: "由主日申言稿編輯器產生的固定 A4 版面",
+                    name: "主日申言稿",
+                  },
                 }),
               ],
             }),
-            new docx.Table({
-              width: { size: TABLE_WIDTH_DXA, type: docx.WidthType.DXA },
-              layout: docx.TableLayoutType.FIXED,
-              columnWidths: [LABEL_WIDTH_DXA, CONTENT_WIDTH_DXA],
-              rows: [
-                sectionRow("題目", values.title, 560),
-                sectionRow("經文", values.scripture, 1320),
-                sectionRow("啟示", values.revelation, 3050),
-                sectionRow("應用", values.application, 3050),
-              ],
-            }),
-            new docx.Paragraph({ spacing: { before: 220 }, children: [new docx.TextRun({ text: "備註：1. 申言時注意：靈要剛強、思路清明、體態合宜。", font: "Microsoft JhengHei", size: WORD_BODY_SIZE })] }),
-            new docx.Paragraph({ children: [new docx.TextRun({ text: "　　　2. 申言稿內容以當週晨興聖言進度為範圍，以3分鐘為限。", font: "Microsoft JhengHei", size: WORD_BODY_SIZE })] }),
-            new docx.Paragraph({ children: [new docx.TextRun({ text: "　　　3. 若本週改寫其他作業，則不必填寫本表。", font: "Microsoft JhengHei", size: WORD_BODY_SIZE })] }),
           ],
         },
       ],
@@ -168,22 +166,7 @@
   const buildPdf = async () => {
     if (!window.html2canvas || !window.jspdf?.jsPDF) throw new Error("PDF 單頁產生套件尚未載入，請重新整理頁面後再試。");
     const values = data();
-    const exportPreview = preview.cloneNode(true);
-    exportPreview.id = "documentPreviewPdf";
-    exportPreview.classList.add("pdf-export-page");
-    document.body.appendChild(exportPreview);
-
-    let canvas;
-    try {
-      canvas = await window.html2canvas(exportPreview, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-      });
-    } finally {
-      exportPreview.remove();
-    }
-
+    const canvas = await captureA4Preview(2);
     const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
     const pageWidth = 210;
     const pageHeight = 297;
