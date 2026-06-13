@@ -133,6 +133,7 @@ textarea:focus {
 .actions {
   position: sticky;
   bottom: 0;
+  flex-wrap: wrap;
   margin: 16px -18px -18px;
   padding: 14px 18px;
   background: #ffffff;
@@ -141,6 +142,7 @@ textarea:focus {
 }
 
 button {
+  flex: 1 1 120px;
   min-height: 40px;
   padding: 8px 14px;
   border: 1px solid var(--accent);

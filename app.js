@@ -123,11 +123,10 @@
     }
   };
 
-  const buildDocx = async () => {
+  const createDocxBlob = async () => {
     if (!window.docx) throw new Error("DOCX 套件尚未載入，請確認網路連線後重試。");
     if (!window.html2canvas) throw new Error("手機版 Word 版面套件尚未載入，請重新整理頁面後再試。");
     const docx = window.docx;
-    const values = data();
     const canvas = await captureA4Preview(1);
 
     const doc = new docx.Document({
@@ -159,8 +158,34 @@
       ],
     });
 
-    const blob = await docx.Packer.toBlob(doc);
+    return docx.Packer.toBlob(doc);
+  };
+
+  const buildDocx = async () => {
+    const values = data();
+    const blob = await createDocxBlob();
     saveBlob(blob, fileName(values, "docx"));
+  };
+
+  const shareDocxToLine = async () => {
+    const values = data();
+    const name = fileName(values, "docx");
+    const blob = await createDocxBlob();
+    const file = new File([blob], name, {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    });
+
+    if (navigator.canShare?.({ files: [file] }) && navigator.share) {
+      await navigator.share({
+        title: "主日申言稿",
+        text: "主日申言稿 Word 檔",
+        files: [file],
+      });
+      return;
+    }
+
+    saveBlob(blob, name);
+    alert("這個瀏覽器不支援直接分享 Word 檔。已先下載 Word，請到 LINE 選擇檔案傳送。");
   };
 
   const buildPdf = async () => {
@@ -220,6 +245,7 @@
   });
   document.getElementById("downloadDocx").addEventListener("click", (event) => runAction(event.currentTarget, buildDocx));
   document.getElementById("downloadPdf").addEventListener("click", (event) => runAction(event.currentTarget, buildPdf));
+  document.getElementById("shareDocx").addEventListener("click", (event) => runAction(event.currentTarget, shareDocxToLine));
 
   syncPreview();
 })();
